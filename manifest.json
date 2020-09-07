@@ -14,7 +14,11 @@
       {
         "matches": ["*://colonist.io/*"],
         "run_at": "document_start",
-        "js": ["contentScript.js"]
+        "js": ["content_scripts/proxy.js"]
+      },
+      {
+        "matches": ["*://colonist.io/*"],
+        "js": ["content_scripts/ui.js"]
       }
     ],
     "options_page": "options.html",
