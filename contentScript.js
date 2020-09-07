@@ -5,6 +5,11 @@ const websocketWrapper = function(serverPath) {
         serverWS.send(JSON.stringify({"recv": true}))
     }, 1000);
 
+    const pushStatsToState = (event) => {
+        window.colonistHUDStats = JSON.parse(event.data);
+    }
+    serverWS.addEventListener('message', pushStatsToState)
+
     // proxy the window.WebSocket object
     const WebSocketProxy = new Proxy(window.WebSocket, {
         construct: function (target, args) {
@@ -18,7 +23,6 @@ const websocketWrapper = function(serverPath) {
 
             // WebSocket "onmessage" handler
             const messageHandler = (event) => {
-                console.log('Message', event);
                 serverWS.send(event.data);
             };
 
@@ -39,7 +43,6 @@ const websocketWrapper = function(serverPath) {
             // proxy the WebSocket.send() function
             const sendProxy = new Proxy(instance.send, {
                 apply: function (target, thisArg, args) {
-                    console.log('Send', args);
                     target.apply(thisArg, args);
                 }
             });
