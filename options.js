@@ -7,6 +7,8 @@ chrome.storage.sync.get("colonistHUDServerPath", function(data) {
 });
 
 saveButton.onclick = function(element) {
-    statusDiv.textContent = "Server path saved."
-    setTimeout(() => statusDiv.textContent = '', 750)
+    chrome.storage.sync.set({"colonistHUDServerPath": serverPathInput.value}, function(data) {
+    	statusDiv.textContent = "Server path saved."
+    	setTimeout(() => statusDiv.textContent = '', 750)
+    })
 };
