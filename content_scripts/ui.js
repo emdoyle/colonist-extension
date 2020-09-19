@@ -1,7 +1,9 @@
 const statBox = document.createElement('p');
 statBox.style.zIndex = "999";
-statBox.style.width = "300px";
-statBox.style.height = "300px";
+statBox.style.minWidth = "300px";
+statBox.style.minHeight = "300px";
+statBox.style.padding = "10px 5px 10px 10px";
+statBox.style.borderRadius = "4px";
 statBox.style.position = "absolute";
 statBox.style.whiteSpace = "pre";
 statBox.style.backgroundColor = "#AED3E5"
