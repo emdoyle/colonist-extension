@@ -12,6 +12,21 @@ statBox.textContent = JSON.stringify({});
 document.body.append(statBox);
 
 const statsWrapper = function() {
+    function removeChildren(element) {
+        while (element.firstChild) {
+            element.removeChild(element.firstChild)
+        }
+    }
+    function removeAds() {
+        const adIds = [
+            "lobby_ad_left",
+            "lobby_ad_right",
+            "in-game-ad-left",
+            "in-game-ad-right"
+        ];
+        adIds.forEach(adId => removeChildren(document.getElementById(adId)))
+    }
+    setInterval(removeAds, 500);
     window.colonistHUDStats = new Proxy((window.colonistHUDStats || {}), {
         set: (target, p, value, receiver) => {
             document.getElementById("colonistHUDStatBox").textContent = JSON.stringify(value, null, 4);
