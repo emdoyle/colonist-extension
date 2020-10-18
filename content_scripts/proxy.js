@@ -1,15 +1,27 @@
 const websocketWrapper = function(serverPath) {
     'use strict';
     const serverWS = new window.WebSocket(serverPath);
-    setInterval(function () {
-        serverWS.send(JSON.stringify({"recv": true}))
-    }, 1000);
+    serverWS.initialized = false;
 
     window.colonistHUDStats = {};
-    const pushStatsToState = (event) => {
-        window.colonistHUDStats.data = JSON.parse(event.data);
+    const colonistHUDServerMessageHandler = (event) => {
+        const jsonData = JSON.parse(event.data);
+        if (jsonData["id"] === -2) {
+            localStorage.setItem("colonistHUDToken", jsonData["data"]["token"])
+            serverWS.initialized = true;
+        } else {
+            window.colonistHUDStats.data = jsonData;
+        }
     }
-    serverWS.addEventListener('message', pushStatsToState)
+
+    const colonistHUDServerOpenHandler = () => {
+        const token = localStorage.getItem("colonistHUDToken");
+        const data = token ? {"token": token} : {};
+        serverWS.send(JSON.stringify({"id": -2, "data": data}));
+    }
+
+    serverWS.addEventListener('message', colonistHUDServerMessageHandler)
+    serverWS.addEventListener('open', colonistHUDServerOpenHandler)
 
     // proxy the window.WebSocket object
     const WebSocketProxy = new Proxy(window.WebSocket, {
@@ -24,7 +36,9 @@ const websocketWrapper = function(serverPath) {
 
             // WebSocket "onmessage" handler
             const messageHandler = (event) => {
-                serverWS.send(event.data);
+                if (serverWS.initialized) {
+                    serverWS.send(event.data);
+                }
             };
 
             // WebSocket "onclose" handler
@@ -48,14 +62,20 @@ const websocketWrapper = function(serverPath) {
 
     // replace the native WebSocket with the proxy
     window.WebSocket = WebSocketProxy;
+    window.colonistHUDServerWS = serverWS;
 };
+
+function injectCode(stringifiedCode) {
+    const scriptTag = document.createElement('script');
+    scriptTag.textContent = stringifiedCode;
+    (document.head || document.documentElement).appendChild(scriptTag);
+    scriptTag.remove()
+}
+
 chrome.storage.sync.get(
     "colonistHUDServerPath",
     (data) => {
         const stringifiedCode = '(' + websocketWrapper + ')(' + JSON.stringify(data.colonistHUDServerPath) + ');';
-        const scriptTag = document.createElement('script');
-        scriptTag.textContent = stringifiedCode;
-        (document.head || document.documentElement).appendChild(scriptTag);
-        scriptTag.remove()
+        injectCode(stringifiedCode);
     }
 );
