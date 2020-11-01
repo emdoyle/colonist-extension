@@ -36,6 +36,7 @@ const statsWrapper = function() {
     console.log("Watching colonist HUD stats...");
 };
 
+// refactor the injection process to split behavior into more files
 const stringifiedCode = '(' + statsWrapper + ')();';
 const scriptTag = document.createElement('script');
 scriptTag.textContent = stringifiedCode;

@@ -3,14 +3,14 @@ const websocketWrapper = function(serverPath) {
     const serverWS = new window.WebSocket(serverPath);
     serverWS.initialized = false;
 
-    window.colonistHUDStats = {};
+    window.colonistHUDStats = {"data": {}};
     const colonistHUDServerMessageHandler = (event) => {
         const jsonData = JSON.parse(event.data);
         if (jsonData["id"] === -2) {
             localStorage.setItem("colonistHUDToken", jsonData["data"]["token"])
             serverWS.initialized = true;
         } else {
-            window.colonistHUDStats.data = jsonData;
+            window.colonistHUDStats.data = {...window.colonistHUDStats.data, ...jsonData};
         }
     }
 
