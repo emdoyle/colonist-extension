@@ -18,7 +18,8 @@
       },
       {
         "matches": ["*://colonist.io/*"],
-        "js": ["content_scripts/ui.js"]
+        "run_at": "document_end",
+        "js": ["content_scripts/stats.js", "content_scripts/ads.js", "content_scripts/board.js"]
       }
     ],
     "options_page": "options.html",

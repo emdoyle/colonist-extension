@@ -63,9 +63,19 @@ const websocketWrapper = function(serverPath) {
     // replace the native WebSocket with the proxy
     window.WebSocket = WebSocketProxy;
     window.colonistHUDServerWS = serverWS;
+
+    // set up observers and proxy the stats object
+    window.colonistHUDStats = new Proxy((window.colonistHUDStats || {}), {
+        set: (target, p, value, receiver) => {
+          (window.colonistHUDStatsObservers || []).forEach(observer => observer(value))
+          return Reflect.set(target, p, value, receiver);
+        }
+    })
+    console.log("Watching colonist HUD stats...");
 };
 
-function injectCode(stringifiedCode) {
+function injectCode(jsFunction, ...args) {
+    const stringifiedCode = '(' + jsFunction + ')(' + args.map(arg => JSON.stringify(arg)).join(", ") + ');';
     const scriptTag = document.createElement('script');
     scriptTag.textContent = stringifiedCode;
     (document.head || document.documentElement).appendChild(scriptTag);
@@ -75,7 +85,6 @@ function injectCode(stringifiedCode) {
 chrome.storage.sync.get(
     "colonistHUDServerPath",
     (data) => {
-        const stringifiedCode = '(' + websocketWrapper + ')(' + JSON.stringify(data.colonistHUDServerPath) + ');';
-        injectCode(stringifiedCode);
+        injectCode(websocketWrapper, data.colonistHUDServerPath);
     }
 );
